@@ -21,178 +21,162 @@ In the controller we have two sections, the first is for the actual template pag
 
 Let me know if you find a use for this and if you find any bugs.
 
- 
-
 ###########################################################
-USAGE
+### USAGE
+##########################################################
 Put this file in /<project folder>/libs/
-Recommended to use a format field correctly set in your model reference tables. E.g. format='%(name)s',
-##########################################################
+In your models.py it is Recomended to use a format field correctly set in reference tables. E.g. format='%(name)s', so that the selection options can use this to display in drop downs etc.
 
-CONTROLLER.PY:(An example)
-from .libs.DatatablesEditor_API import dteditor_data
-
-###########################################################
-### question
-##########################################################
-@action('question', method=["GET", "POST"])
-@action.uses(session, db, auth.user, "questions.html")
-def question():
-
-#... anything else here.
-return locals()
-
-@action('question_data', method=['GET', 'POST'])
-@action.uses(session, db, auth.user)
-def question_data():
-table = db.t_question
-return dteditor_data(table, request)
-
-MODELS.PY: (An example)
-
+MODELS.PY:
 ########################################
 db.define_table('group',
-Field('name', type='string', unique=True,
-label=T('Name')),
-Field('f_desc', type='string',
-label=T('Description')),
-format='%(name)s',
+    Field('name', type='string', unique=True,
+          label=T('Name')),
+    Field('f_desc', type='string',
+          label=T('Description')),
+    format='%(name)s',
+    )
+db.define_table('t_video',
+    Field('f_name', type='string',
+          label=T('Name')),
+    Field('f_desc', type='string',
+          label=T('Description')),
+    Field('group', type='reference group',
+          label=T('Group')),
+    Field('f_vimeoid', type='string', label=T('VimeoID')),
+    format='%(f_name)s',
 )
 
-
+CONTROLLER.PY:
 ########################################
-db.define_table('t_question',
-Field('f_name', type='string',
-label=T('Name')),
-Field('f_desc', type='string',
-label=T('Description')),
-Field('group', type='reference group',
-label=T('Group')),
-Field('picture', 'upload', default='',
-upload_path=settings.UPLOAD_PATH,
-download_url=lambda filename: URL('download/%s' % filename)),
-format='%(f_name)s',
-)
+from .libs.datatables_API import dteditor_data
 
+@action("video", method=["GET", "POST"])
+@action.uses(session, db, auth.user, "videos.html")
+def video():
+    page_title = 'Videos'
+    page_subtitle = 'Videos'
 
+    return dict(page_title=page_title, page_subtitle= page_subtitle)
 
+@action('video_data', method=['GET', 'POST'])
+@action.uses(session, db, auth.user)
+def video_data():
+    table = db.t_video
+    return dteditor_data(table, request)
 
-TEMPLATE e.g.: questions.html: (An example)
-
-1. The table should match the fields, see Datatables Editor help
-
-2. Javascript layout as per Datatables Editor help
-
-3. Modify the Ajax call to suit your app. as an example ajax: "/MindTrax/question_data",
-
-4. If you use upload images, then you need to have a downloadfile helper in your controller and an upload table.
+TEMPLATE: questions.html:
+You need to lay out the datatables in javascript, E.G.
+Download and install Editor
 ########################################
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4-4.1.1/jq-3.3.1/jszip-2.5.0/dt-1.10.24/af-2.3.5/b-1.7.0/b-colvis-1.7.0/b-html5-1.7.0/b-print-1.7.0/cr-1.5.3/date-1.0.3/fc-3.3.2/fh-3.1.8/kt-2.6.1/r-2.2.7/rg-1.1.2/rr-1.2.7/sc-2.0.3/sb-1.0.1/sp-1.2.2/sl-1.3.3/datatables.min.css"/>
-<link rel="stylesheet" type="text/css" href="DataTables/Editor-2.0.1/css/editor.bootstrap4.css"/>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4-4.1.1/jq-3.3.1/jszip-2.5.0/dt-1.10.24/af-2.3.5/b-1.7.0/b-colvis-1.7.0/b-html5-1.7.0/b-print-1.7.0/cr-1.5.3/date-1.0.3/fc-3.3.2/fh-3.1.8/kt-2.6.1/r-2.2.7/rg-1.1.2/rr-1.2.7/sc-2.0.3/sb-1.0.1/sp-1.2.2/sl-1.3.3/datatables.min.css"/>
+    <link rel="stylesheet" type="text/css" href="DataTables/Editor-2.0.1/css/editor.bootstrap4.css"/>
 
 <div class="container-fluid">
-<div class="row">
-<div class="col-sm w-98 p-2 border">
-<h1>questions</h1>
-<table id="questions" class="table table-bordered table-sm table-hover" style="width:100%">
-<thead>
-<tr >
-<th data-toggle="tooltip" data-placement="top" title="Name">Name</th>
-<th data-toggle="tooltip" data-placement="top" title="Description">Desc</th>
-<th data-toggle="tooltip" data-placement="top" title="Group">Group</th>
-<th data-toggle="tooltip" data-placement="top" title="Picture">Picture</th>
-</tr>
-</thead>
-</table>
-</div>
-</div>
+  <div class="row">
+    <div class="col-sm w-98 p-2 border">
+        <h1>questions</h1>
+        <table id="questions" class="table table-bordered table-sm table-hover" style="width:100%">
+            <thead>
+                <tr >
+                    <th data-toggle="tooltip" data-placement="top" title="Name">Name</th>
+                    <th data-toggle="tooltip" data-placement="top" title="Description">Desc</th>
+                    <th data-toggle="tooltip" data-placement="top" title="Group">Group</th>
+                    <th data-toggle="tooltip" data-placement="top" title="Picture">Picture</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+  </div>
 </div>
 <script>
 var editor; // use a global for the submit and return data rendering in the examples
 
 $(document).ready(function() {
-///////////////////////////////////////////////////////
-//question
-///////////////////////////////////////////////////////
-var questionEditor = new $.fn.dataTable.Editor
-({
-ajax: {
-url: "/MindTrax/question_data",
-data: function (d) {
-var selected = questionTable.row({selected: true});
-if (selected.any()) {
-d.question = selected.data().t_question.id;
-}
-}
-},
-table: '#questions',
-idSrc: "t_question.id",
-fields: [
-{
-label: "Name:",
-name: "t_question.f_name",
-},
-{
-label: "Desc:",
-name: "t_question.f_desc",
-},
-{
-label: "group:",
-name: "group.name",
-type: "select",
-},
-{
-label: "Picture:",
-name: "t_question.picture",
-type: "upload",
-display: function (file_id) {
-return file_id ?
-'<img src="'+ '/MindTrax/downloadfile/t_question_'+ file_id.toString() + '.png" width="25" height="25">' :
-null;
-},
+    ///////////////////////////////////////////////////////
+    //question
+    ///////////////////////////////////////////////////////
+    var questionEditor = new $.fn.dataTable.Editor
+    ({
+        ajax: {
+            url: "/MindTrax/question_data",
+            data: function (d) {
+                var selected = questionTable.row({selected: true});
+                if (selected.any()) {
+                    d.question = selected.data().t_question.id;
+                }
+            }
+        },
+        table: '#questions',
+        idSrc: "t_question.id",
+        fields: [
+            {
+                label: "Name:",
+                name: "t_question.f_name",
+            },
+            {
+                label: "Desc:",
+                name: "t_question.f_desc",
+            },
+            {
+                label: "group:",
+                name: "group.name",
+                type: "select",
+            },
+            {
+                label: "Picture:",
+                name: "t_question.picture",
+                type: "upload",
+                display: function (file_id) {
+                    return file_id ?
+                        '<img src="'+ '/MindTrax/downloadfile/t_question_'+ file_id.toString() + '.png" width="25" height="25">' :
+                        null;
+                },
 
-},
-]
-}
-);
+            },
+            ]
+        }
+    );
 
-var questionTable = $('#questions').DataTable
-( {
-dom: 'BfrtipQ',
-ajax: "/MindTrax/question_data",
-idSrc: "t_question.id",
-columns: [
-{ data: 't_question.f_name',
-title: "Name",
-},
-{ data: 't_question.f_desc',
-title: "Description",
-},
-{ data: "group.name" },
-{ data: "t_question.picture",
-render: function ( file_id ) {
-return file_id ?
-'<img src="/MindTrax/downloadfile/t_question_' + file_id.toString() + '.png" width="25" height="25">' :
-null;
-},
-defaultContent: "No image",
-title: "Image",
-},
-],
-select: {
-style: 'single'
-},
-buttons: [
-{ extend: 'create', editor: questionEditor },
-{ extend: 'edit', editor: questionEditor },
-{ extend: 'remove', editor: questionEditor },
-],
-} );
+    var questionTable = $('#questions').DataTable
+    ( {
+        dom: 'BfrtipQ',
+        ajax: "/MindTrax/question_data",
+        idSrc: "t_question.id",
+        columns: [
+            { data: 't_question.f_name',
+                title: "Name",
+            },
+            { data: 't_question.f_desc',
+                title: "Description",
+            },
+            { data: "group.name" },
+            { data: "t_question.picture",
+                  render: function ( file_id ) {
+                    return file_id ?
+                        '<img src="/MindTrax/downloadfile/t_question_' + file_id.toString() + '.png" width="25" height="25">' :
+                        null;
+                },
+                defaultContent: "No image",
+                title: "Image",
+                },
+            ],
+        select: {
+            style: 'single'
+        },
+        buttons: [
+            { extend: 'create', editor: questionEditor },
+            { extend: 'edit',   editor: questionEditor },
+            { extend: 'remove', editor: questionEditor },
+        ],
+    } );
 
 
 
 });
 </script>
-<script type="text/javascript" src="https://cdn.datatables.net/v/bs4-4.1.1/jq-3.3.1/jszip-2.5.0/dt-1.10.24/af-2.3.5/b-1.7.0/b-colvis-1.7.0/b-html5-1.7.0/b-print-1.7.0/cr-1.5.3/date-1.0.3/fc-3.3.2/fh-3.1.8/kt-2.6.1/r-2.2.7/rg-1.1.2/rr-1.2.7/sc-2.0.3/sb-1.0.1/sp-1.2.2/sl-1.3.3/datatables.min.js"></script>
-<script type="text/javascript" src="DataTables/Editor-2.0.1/js/dataTables.editor.js"></script>
-<script type="text/javascript" src="DataTables/Editor-2.0.1/js/editor.bootstrap4.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/v/bs4-4.1.1/jq-3.3.1/jszip-2.5.0/dt-1.10.24/af-2.3.5/b-1.7.0/b-colvis-1.7.0/b-html5-1.7.0/b-print-1.7.0/cr-1.5.3/date-1.0.3/fc-3.3.2/fh-3.1.8/kt-2.6.1/r-2.2.7/rg-1.1.2/rr-1.2.7/sc-2.0.3/sb-1.0.1/sp-1.2.2/sl-1.3.3/datatables.min.js"></script>
+    <script type="text/javascript" src="DataTables/Editor-2.0.1/js/dataTables.editor.js"></script>
+    <script type="text/javascript" src="DataTables/Editor-2.0.1/js/editor.bootstrap4.js"></script>
+
+

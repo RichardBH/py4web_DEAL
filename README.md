@@ -1,7 +1,7 @@
 # Py4Web_DEAL
 Py4Web Datatables Editor Ajax Library (Full CRUD)
 
-Ok, the first implementation is now ready - needs testing if anyone wants to use it. Message me and I will send a copy, I plan to put this into a GitHub Repository
+Ok, the first implementation is now ready - needs testing if anyone wants to use it. 
 
 This library serves up AJAX data to the DataTables and/or Editor libraries. It can be used to simply get AJAX data to show a Datatables Table (free), or add full CRUD capabilities with an Editor license. (https://editor.datatables.net/)
 
